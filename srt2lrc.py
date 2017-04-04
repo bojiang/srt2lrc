@@ -3,14 +3,20 @@ Run it in srt file folder.
 python 3.x
 '''
 import glob
+import re
+
+
+SRT_BLOCK_REGEX = re.compile(
+        r'(\d+)[^\S\r\n]*[\r\n]+'
+        r'(\d{2}:\d{2}:\d{2},\d{3,4})[^\S\r\n]*-->[^\S\r\n]*(\d{2}:\d{2}:\d{2},\d{3,4})[^\S\r\n]*[\r\n]+'
+        r'([\s\S]*)')
 
 
 def srt_block_to_irc(block):
-    infos = block.split('\n', 2)
-    if not infos or not len(infos) == 3:
+    match = SRT_BLOCK_REGEX.search(block)
+    if not match:
         return None
-    num, time_str, content = infos
-    ts, te = time_str.replace('\n', '').split(' --> ')
+    num, ts, te, content = match.groups()
     ts = ts[3:-1].replace(',', '.')
     te = te[3:-1].replace(',', '.')
     co = content.replace('\n', ' ')
